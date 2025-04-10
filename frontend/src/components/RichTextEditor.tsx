@@ -1,11 +1,21 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import api from '../api/axios';
 
 const RichTextEditor: React.FC = () => {
   const [editorData, setEditorData] = useState<string>('');
 
-  const handleSave = () => {
+    // 🔁 Clear editor if "New Post" button was clicked
+    useEffect(() => {
+        const shouldClear = sessionStorage.getItem('clearEditor');
+        if (shouldClear === 'true') {
+            setEditorData('');
+            sessionStorage.removeItem('clearEditor');
+        }
+        }, []);
+
+  const handleSave = async () => {
     if (!editorData.trim()) {
       alert('Editor is empty. Please write something before saving.');
       return;
@@ -14,7 +24,7 @@ const RichTextEditor: React.FC = () => {
     const title = prompt('Enter a title for your post:');
     if (!title) return;
   
-    const existingPosts = JSON.parse(localStorage.getItem('posts') || '[]');
+    // const existingPosts = JSON.parse(localStorage.getItem('posts') || '[]');
   
     const newPost = {
       id: Date.now(),
@@ -23,10 +33,19 @@ const RichTextEditor: React.FC = () => {
       createdAt: new Date().toISOString(),
     };
   
-    existingPosts.push(newPost);
-    localStorage.setItem('posts', JSON.stringify(existingPosts));
+    // existingPosts.push(newPost);
+    // localStorage.setItem('posts', JSON.stringify(existingPosts));
   
-    alert('Post saved successfully!');
+    // alert('Post saved successfully!');
+
+    try {
+        await api.post('/posts', newPost);
+        alert('Post saved to backend!');
+        setEditorData('');
+      } catch (err) {
+        console.error('Failed to save post:', err);
+        alert('Error saving post.');
+      }
   };
   
 
@@ -46,7 +65,7 @@ const RichTextEditor: React.FC = () => {
         onClick={handleSave}
         className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
       >
-        Save Content
+        Save Post
       </button>
       <div className="mt-4">
         <h3 className="text-md font-semibold">Live Preview:</h3>

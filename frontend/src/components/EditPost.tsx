@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import api from '../api/axios';
 
 type Post = {
   id: number;
@@ -11,33 +12,48 @@ type Post = {
 };
 
 const EditPost: React.FC = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [post, setPost] = useState<Post | null>(null);
-  const [content, setContent] = useState('');
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const [post, setPost] = useState<Post | null>(null);
+    const [content, setContent] = useState('');
+    const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const posts = JSON.parse(localStorage.getItem('posts') || '[]');
-    const foundPost = posts.find((p: Post) => p.id === Number(id));
-    if (foundPost) {
-      setPost(foundPost);
-      setContent(foundPost.content);
-    }
+    const fetchPost = async () => {
+      try {
+        const response = await api.get(`/posts/${id}`);
+        setPost(response.data);
+        setContent(response.data.content);
+      } catch (err) {
+        console.error('Failed to fetch post:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPost();
   }, [id]);
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (!post) return;
 
-    const posts = JSON.parse(localStorage.getItem('posts') || '[]');
-    const updatedPosts = posts.map((p: Post) =>
-      p.id === post.id ? { ...p, content } : p
-    );
-    localStorage.setItem('posts', JSON.stringify(updatedPosts));
-    alert('Post updated!');
-    navigate(`/posts/${post.id}`);
+    const updatedPost = {
+      ...post,
+      content,
+    };
+
+    try {
+      await api.put(`/posts/${post.id}`, updatedPost);
+      alert('Post updated!');
+      navigate(`/posts/${post.id}`);
+    } catch (err) {
+      console.error('Failed to update post:', err);
+      alert('Error updating post.');
+    }
   };
 
-  if (!post) return <p>Loading...</p>;
+  if (loading) return <p>Loading post...</p>;
+  if (!post) return <p>Post not found.</p>;
 
   return (
     <div className="p-4">

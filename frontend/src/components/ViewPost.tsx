@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import api from '../api/axios';
 
 type Post = {
   id: number;
@@ -9,10 +10,30 @@ type Post = {
 };
 
 const ViewPost: React.FC = () => {
-  const { id } = useParams();
-  const posts = JSON.parse(localStorage.getItem('posts') || '[]');
-  const post: Post | undefined = posts.find((p: Post) => p.id === Number(id));
+  // const { id } = useParams();
+  // const posts = JSON.parse(localStorage.getItem('posts') || '[]');
+  // const post: Post | undefined = posts.find((p: Post) => p.id === Number(id));
+  const { id } = useParams<{ id: string }>();
+  const [post, setPost] = useState<Post | null>(null);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const response = await api.get(`/posts/${id}`);
+        setPost(response.data);
+      } catch (err) {
+        console.error('Failed to fetch post:', err);
+        setPost(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPost();
+  }, [id]);
+
+  if (loading) return <p>Loading post...</p>;
   if (!post) return <p>Post not found.</p>;
 
   return (

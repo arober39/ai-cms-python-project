@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import api from '../api/axios';
 
 type Post = {
   id: number;
@@ -14,19 +15,30 @@ const PostsList: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   useEffect(() => {
-    const saved = localStorage.getItem('posts');
-    if (saved) {
-      setPosts(JSON.parse(saved));
-    }
+    const fetchPosts = async () => {
+      try {
+        const response = await api.get('/posts');
+        setPosts(response.data);
+      } catch (err) {
+        console.error('Failed to fetch posts:', err);
+      }
+    };
+
+    fetchPosts();
   }, []);
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     const confirmed = window.confirm('Are you sure you want to delete this post?');
     if (!confirmed) return;
 
-    const updatedPosts = posts.filter(post => post.id !== id);
-    localStorage.setItem('posts', JSON.stringify(updatedPosts));
-    setPosts(updatedPosts);
+    try {
+      await api.delete(`/posts/${id}`);
+      setPosts(posts.filter(post => post.id !== id));
+      alert('Post deleted!');
+    } catch (err) {
+      console.error('Failed to delete post:', err);
+      alert('Error deleting post.');
+    }
   };
 
   const sortedPosts = [...posts].sort((a, b) => {
@@ -41,33 +53,33 @@ const PostsList: React.FC = () => {
   );
 
   return (
-    <div className="p-4">
+    <div className="p-4 max-w-5xl mx-auto">
       <h2 className="text-xl font-bold mb-4">All Saved Posts</h2>
-      <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <label className="mr-2 font-medium">Sort by:</label>
-            <select
-                value={sortOrder}
-                onChange={e => setSortOrder(e.target.value as 'newest' | 'oldest')}
-                className="border px-2 py-1 rounded"
-                >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-            </select>
+          <label className="mr-2 font-medium">Sort by:</label>
+          <select
+            value={sortOrder}
+            onChange={e => setSortOrder(e.target.value as 'newest' | 'oldest')}
+            className="border px-2 py-1 rounded"
+          >
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+          </select>
         </div>
 
-        <div className="mb-6 flex justify-center">
-          <input
-            type="text"
-            placeholder="Search posts..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            className="border px-2 py-1 rounded w-full sm:w-64"
-          />
-        </div>
-       </div>
+        <input
+          type="text"
+          placeholder="Search posts..."
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          className="border px-4 py-2 rounded w-full sm:w-64"
+        />
+      </div>
+
       {filteredPosts.length === 0 ? (
-        <p>No posts saved yet.</p>
+        <p>No posts match your search.</p>
       ) : (
         <ul className="space-y-4">
           {filteredPosts.map(post => (
