@@ -4,6 +4,7 @@ import RichTextEditor from './components/RichTextEditor';
 import PostsList from './components/PostsList';
 import ViewPost from './components/ViewPost';
 import EditPost from './components/EditPost';
+import AskDocs from './components/AskDocs';
 
 const AppNav: React.FC = () => {
   const navigate = useNavigate();
@@ -15,13 +16,16 @@ const AppNav: React.FC = () => {
 
   return (
     <nav className="mb-6 flex justify-between items-center">
-      <h1 className="text-2xl font-bold text-blue-700">Mini CMS</h1>
+      <h1 className="text-2xl font-bold text-blue-700">CMS with Documentation Q&A</h1>
       <div className="space-x-4">
         <button onClick={handleNewPostClick} className="text-blue-600 hover:underline">
           New Post
         </button>
         <button onClick={() => navigate('/posts')} className="text-blue-600 hover:underline">
           All Posts
+        </button>
+        <button onClick={() => navigate('/ask-docs')} className="text-blue-600 hover:underline">
+          Ask Docs
         </button>
       </div>
     </nav>
@@ -39,6 +43,7 @@ const App: React.FC = () => {
           <Route path="/posts" element={<PostsList />} />
           <Route path="/posts/:id" element={<ViewPost />} />
           <Route path="/edit/:id" element={<EditPost />} />
+          <Route path="/ask-docs" element={<AskDocs />} />
         </Routes>
       </div>
     </Router>

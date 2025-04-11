@@ -1,5 +1,5 @@
-# schemas.py
 from pydantic import BaseModel
+from typing import Optional
 
 class PostBase(BaseModel):
     title: str
@@ -14,3 +14,14 @@ class PostOut(PostBase):
 
     class Config:
         orm_mode = True
+
+
+class AskRequest(BaseModel):
+    question: str
+
+# (Optional) If you want to return top chunks too
+class ChunkMatch(BaseModel):
+    id: int
+    content: str
+    source: Optional[str]
+    similarity: Optional[float]
