@@ -41,25 +41,7 @@ This project is a full-stack application that allows users to:
 ---
 
 ## Project Structure
-
-.
-├── backend/
-│   ├── main.py                # FastAPI app with endpoints
-│   ├── models.py              # SQLAlchemy models
-│   ├── database.py            # DB setup + pgvector
-│   ├── schemas.py             # Pydantic schemas
-│   ├── ingest_docs.py         # Script to ingest and embed docs
-│   └── docs/                  # Folder with .md, .txt, or .pdf files
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── RichTextEditor.tsx
-│   │   │   ├── AskDocs.tsx
-│   │   │   └── ...
-│   │   ├── api/axios.ts
-│   │   └── App.tsx
-
----
+![Project Structure](fullstack_project_structure.png)
 
 ## Setup Instructions
 
